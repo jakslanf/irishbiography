@@ -32,4 +32,5 @@ filenames
 
 Beyond2022SampleData/*
 blazegraph.jnl
-blazegraph
+*.jnl
+blazegraph.jar
