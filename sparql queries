@@ -1,0 +1,17 @@
+# Good for grabbing data?
+PREFIX cidoc: <http://erlangen-crm.org/current/>
+PREFIX b2022: <https://ont.virtualtreasury.ie/ontology#>
+PREFIX rdfs:  <http://www.w3.org/2000/01/rdf-schema#>
+SELECT ?s ?o ?name ?fullnamestring
+WHERE
+{
+  ?s cidoc:P71_lists ?o.
+  ?s cidoc:P2_has_type b2022:DIB.
+  ?o cidoc:P1_is_identified_by ?name.
+  ?name rdfs:label ?fullnamestring
+  FILTER(CONTAINS(?fullnamestring, ", ")).
+}
+
+# on wikidata for getting image
+SELECT *
+WHERE { <http://www.wikidata.org/entity/Q30875> wdt:P18 ?x} LIMIT 1

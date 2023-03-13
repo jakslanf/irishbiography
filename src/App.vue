@@ -1,8 +1,10 @@
 <script setup>
 import HelloWorld from './components/HelloWorld.vue'
 import TheWelcome from './components/TheWelcome.vue'
-
+import GetPerson from './components/GetPerson.vue'
+import axios from 'axios';
 </script>
+
 <!--  import axios from 'axios'; Vue.prototype.$http = axios; -->
 <template>
   <header>
@@ -14,7 +16,9 @@ import TheWelcome from './components/TheWelcome.vue'
   </header>
 
   <main>
+    "Hello"
     <TheWelcome />
+    <GetPerson />
   </main>
 </template>
 

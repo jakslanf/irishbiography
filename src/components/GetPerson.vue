@@ -16,8 +16,20 @@ export default {
   // Fetches posts when the component is created.
   async created() {
     try {
-      const response = await axios.get(`http://localhost:9999/bigdata/sparql?s=<https://kb.virtualtreasury.ie/person/Synnott_Nicholas-Joseph_c20_dib_a8431>`)
+      console.log("zowee")
+      const response = await axios.post(
+          'http://localhost:80/blazegraph/namespace/BeyondSample/sparql/',
+          new URLSearchParams({
+            'query': 'SELECT * { ?s ?p ?o } LIMIT 1'
+          }),
+          {
+            headers: {
+              'Accept': 'application/json'
+            }
+          }
+      );
       this.posts = response.data
+      console.log("wowee")
     } catch (e) {
       this.errors.push(e)
     }
