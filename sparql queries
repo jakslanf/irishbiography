@@ -2,13 +2,15 @@
 PREFIX cidoc: <http://erlangen-crm.org/current/>
 PREFIX b2022: <https://ont.virtualtreasury.ie/ontology#>
 PREFIX rdfs:  <http://www.w3.org/2000/01/rdf-schema#>
-SELECT ?s ?o ?name ?fullnamestring
+PREFIX owl:<http://www.w3.org/2002/07/owl#>
+SELECT ?s ?o ?name ?fullnamestring ?wikientity
 WHERE
 {
   ?s cidoc:P71_lists ?o.
   ?s cidoc:P2_has_type b2022:DIB.
   ?o cidoc:P1_is_identified_by ?name.
   ?name rdfs:label ?fullnamestring.
+  ?o owl:sameAs ?wikientity.
   FILTER(CONTAINS(?fullnamestring, ", ")).
   FILTER(regex(str(?s), "www.dib.ie" ) ).
 }
