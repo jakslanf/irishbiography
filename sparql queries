@@ -8,8 +8,9 @@ WHERE
   ?s cidoc:P71_lists ?o.
   ?s cidoc:P2_has_type b2022:DIB.
   ?o cidoc:P1_is_identified_by ?name.
-  ?name rdfs:label ?fullnamestring
+  ?name rdfs:label ?fullnamestring.
   FILTER(CONTAINS(?fullnamestring, ", ")).
+  FILTER(regex(str(?s), "www.dib.ie" ) ).
 }
 
 # on wikidata for getting image
