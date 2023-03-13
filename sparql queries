@@ -1,11 +1,15 @@
 # Good for grabbing data?
+# fixed the issue with multiple people
 PREFIX cidoc: <http://erlangen-crm.org/current/>
 PREFIX b2022: <https://ont.virtualtreasury.ie/ontology#>
 PREFIX rdfs:  <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX owl:<http://www.w3.org/2002/07/owl#>
-SELECT ?s ?o ?name ?fullnamestring ?wikientity
+PREFIX wdt: <http://www.wikidata.org/prop/direct/>
+SELECT ?s ?o ?name ?fullnamestring ?wikientity (GROUP_CONCAT(DISTINCT ?photo; SEPARATOR=", ") AS ?photos)
 WHERE
 {
+  {SELECT ?s ?o ?name ?fullnamestring ?wikientity
+  WHERE{
   ?s cidoc:P71_lists ?o.
   ?s cidoc:P2_has_type b2022:DIB.
   ?o cidoc:P1_is_identified_by ?name.
@@ -13,7 +17,11 @@ WHERE
   ?o owl:sameAs ?wikientity.
   FILTER(CONTAINS(?fullnamestring, ", ")).
   FILTER(regex(str(?s), "www.dib.ie" ) ).
-}
+  }order by asc(UCASE(str(?fullnamestring)))
+	LIMIT 1000
+	OFFSET 3}
+  SERVICE <https://query.wikidata.org/sparql>{OPTIONAL {?wikientity  wdt:P18 ?photo.}}
+} GROUP BY ?s ?o ?name ?fullnamestring ?wikientity
 
 # on wikidata for getting image
 SELECT *
