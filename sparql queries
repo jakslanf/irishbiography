@@ -18,8 +18,8 @@ WHERE
   FILTER(CONTAINS(?fullnamestring, ", ")).
   FILTER(regex(str(?s), "www.dib.ie" ) ).
   }order by asc(UCASE(str(?fullnamestring)))
-	LIMIT 1000
-	OFFSET 3}
+	LIMIT 10
+	OFFSET 0}
   SERVICE <https://query.wikidata.org/sparql>{OPTIONAL {?wikientity  wdt:P18 ?photo.}}
 } GROUP BY ?s ?o ?name ?fullnamestring ?wikientity
 
