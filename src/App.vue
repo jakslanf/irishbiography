@@ -1,24 +1,25 @@
 <script setup>
 import HelloWorld from './components/HelloWorld.vue'
 import TheWelcome from './components/TheWelcome.vue'
-import GetPerson from './components/GetPerson.vue'
+import GetPerson from './components/BiographDashboard.vue'
 import axios from 'axios';
+import BiographDashboard from "@/components/BiographDashboard.vue";
 </script>
 
 <!--  import axios from 'axios'; Vue.prototype.$http = axios; -->
 <template>
   <header>
-    <img alt="Vue logo" class="logo" src="./assets/logo.svg" width="125" height="125" />
+    <!-- <img alt="Vue logo" class="logo" src="./assets/logo.svg" width="125" height="125" />
 
     <div class="wrapper">
       <HelloWorld msg="You did it! Bazinga" />
-    </div>
+    </div> -->
   </header>
 
   <main>
-    "Hello"
-    <TheWelcome />
-    <GetPerson />
+    <!-- <TheWelcome /> -->
+    "Dashboard"
+    <BiographDashboard />
   </main>
 </template>
 
