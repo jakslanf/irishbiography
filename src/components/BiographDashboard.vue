@@ -2,11 +2,10 @@
   <div>
     <!-- <img :src=posts.results.bindings[2].photos.value width="200" height="200">
     <pre>{{posts.results.bindings[2].fullnamestring.value}}</pre> -->
-    <button @click="isFetched = !isFetched">Toggle</button>
     <div v-if="isFetched">
       <BiographyItem :full-name="posts.results.bindings[2].fullnamestring.value" :photo="posts.results.bindings[2].photos.value"/>
-    <div v-for="item in posts.results.bindings" :key="item.diburi">
-      <!-- <BiographyItem :fullName=posts.results.binding[item].fullnamestring/> -->
+    <div v-for="item in posts.results.bindings" >
+      <BiographyItem :full-name="item.fullnamestring.value" :photo="item.photos.value"/>
     </div></div>
     <h1 v-else>Oh no 😢</h1>
   </div>
