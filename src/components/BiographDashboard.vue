@@ -2,12 +2,16 @@
   <div>
     <!-- <img :src=posts.results.bindings[2].photos.value width="200" height="200">
     <pre>{{posts.results.bindings[2].fullnamestring.value}}</pre> -->
-    <div v-if="isFetched">
-      <BiographyItem :full-name="posts.results.bindings[2].fullnamestring.value" :photo="posts.results.bindings[2].photos.value"/>
-    <div v-for="item in posts.results.bindings" >
-      <BiographyItem :full-name="item.fullnamestring.value" :photo="item.photos.value"/>
-    </div></div>
-    <h1 v-else>Oh no 😢</h1>
+    <Transition>
+      <div v-if="isFetched">
+        <div id="dash">
+          <div id="individual" v-for="item in posts.results.bindings">
+            <BiographyItem :full-name="item.fullnamestring.value" :photo="item.photos.value"/>
+          </div>
+        </div>
+      </div>
+      <h1 v-else>Loading...</h1>
+    </Transition>
   </div>
 </template>
 
@@ -52,7 +56,7 @@ export default {
                 '  FILTER(CONTAINS(?fullnamestring, ", ")).\n' +
                 '  FILTER(regex(str(?diburi), "www.dib.ie" ) ).\n' +
                 '  }order by asc(UCASE(str(?fullnamestring)))\n' +
-                '\tLIMIT 10\n' +
+                '\tLIMIT 12\n' +
                 '\tOFFSET 0}\n' +
                 '  SERVICE <https://query.wikidata.org/sparql>{OPTIONAL {?wikientity  wdt:P18 ?photo.}}\n' +
                 '} GROUP BY ?diburi ?vturi ?name ?fullnamestring ?wikientity'
@@ -75,5 +79,40 @@ export default {
 </script>
 
 <style scoped>
+#dash {
+  background-color: green;
+  height: 900px;
+  width: 1000px;
+  padding: 10px;
+  float: left;
 
+}
+
+#individual {
+  background-color: #5A5A5A;
+  width: 230px;
+  height: 250px;
+  float: left;
+  padding: 10px;
+  margin-right: 15px;
+  margin-bottom: 15px;
+  border-radius: 25px;
+  word-wrap: normal;
+  text-align: center;
+  transition: transform .2s; /* Animation */
+}
+
+#individual:hover {
+  transform: scale(1.1); /* (150% zoom - Note: if the zoom is too large, it will go outside of the viewport) */
+}
+
+.v-enter-active,
+.v-leave-active {
+  transition: opacity 0.5s ease;
+}
+
+.v-enter-from,
+.v-leave-to {
+  opacity: 0;
+}
 </style>

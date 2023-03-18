@@ -1,7 +1,7 @@
 <template>
   <div>
-    <img :src=photo width="200" height="200">
-    <pre>{{fullName}}</pre>
+    <img :src=displayphoto width="200" height="200">
+    <div>{{ fullName.replace(/[{()}]/g, '') }}</div>
   </div>
 </template>
 
@@ -12,9 +12,19 @@ export default {
   },
   data() {
     return {
-      name: "BiographyItem"
+      name: "BiographyItem",
+      displayphoto: "src/assets/no_img.png"
     }
-}}
+  },
+  created() {
+    if (this.photo === "") {
+    } else {
+      this.displayphoto = this.photo
+    }
+    console.log(this.fullName)
+  }
+}
+
 </script>
 
 <style scoped>
