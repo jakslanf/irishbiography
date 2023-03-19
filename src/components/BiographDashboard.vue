@@ -4,9 +4,22 @@
     <pre>{{posts.results.bindings[2].fullnamestring.value}}</pre> -->
     <Transition>
       <div v-if="isFetched">
+        <button @click="isPopUp = true">Open Popup</button>
+        <BiographyPopUp v-if="isPopUp" @close="togglePopUp">
+          <h1>Lorem Ipsum</h1>
+          <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent magna ipsum, tincidunt quis viverra vel,
+            egestas et eros. Donec nec hendrerit erat, ut fringilla ipsum. Nam ipsum orci, rhoncus vel ullamcorper in,
+            mattis eu sapien. Etiam vulputate porttitor quam, a bibendum diam ultricies non. Morbi egestas ex sed purus
+            molestie, ac fringilla erat interdum. Nunc augue lacus, tempus eget ultrices quis, semper non nisl. Aenean
+            sed sollicitudin lorem. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis
+            egestas. Etiam neque est, lacinia ut metus vel, molestie tempor massa. Sed et ante sit amet metus fermentum
+            hendrerit eu eget neque. Cras maximus, odio in pharetra fringilla, tortor massa imperdiet purus, eu luctus
+            elit lorem sit amet ipsum. Pellentesque eget nibh ac diam porta vulputate eget vitae lectus. Nulla varius
+            fermentum arcu, sed ultrices magna maximus sed.</p>
+        </BiographyPopUp>
         <div id="dash">
           <div id="individual" v-for="item in posts.results.bindings">
-            <BiographyItem :full-name="item.fullnamestring.value" :photo="item.photos.value"/>
+            <BiographyItem @click="getPopUp(item)" :full-name="item.fullnamestring.value" :photo="item.photos.value"/>
           </div>
         </div>
       </div>
@@ -18,16 +31,29 @@
 <script>
 import BiographyItem from "@/components/BiographyItem.vue";
 import axios from 'axios';
+import BiographyPopUp from "@/components/BiographyPopUp.vue";
+import {ref} from "vue";
 
 
 export default {
-  components: {BiographyItem},
+  components: {BiographyPopUp, BiographyItem},
   data() {
     let posts = [];
     return {
+      BiographyPopUp,
+      isPopUp: false,
       isFetched: false,
+      offset: 0,
       posts: [],
       errors: []
+    }
+  }, methods: {
+    getPopUp(item) {
+      console.log(item.fullnamestring.value)
+      this.togglePopUp()
+    },
+    togglePopUp() {
+      this.isPopUp = !this.isPopUp
     }
   },
 
@@ -51,15 +77,17 @@ export default {
                 '  ?diburi cidoc:P71_lists ?vturi.\n' +
                 '  ?diburi cidoc:P2_has_type b2022:DIB.\n' +
                 '  ?vturi cidoc:P1_is_identified_by ?name.\n' +
-                '  ?name rdfs:label ?fullnamestring.\n' +
+                '  ?name rdfs:label ?fullname.\n' +
                 '  ?vturi owl:sameAs ?wikientity.\n' +
                 '  FILTER(CONTAINS(?fullnamestring, ", ")).\n' +
+                '  BIND(REPLACE(STR(?fullname), "\\\\(|\\\\)", "", "i") AS ?fullnamestring).\n' +
                 '  FILTER(regex(str(?diburi), "www.dib.ie" ) ).\n' +
-                '  }order by asc(UCASE(str(?fullnamestring)))\n' +
-                '\tLIMIT 12\n' +
-                '\tOFFSET 0}\n' +
+                '  }ORDER BY(UCASE(str(?fullnamestring)))\n' +
+                'LIMIT 12\n' +
+                'OFFSET 0}\n' +
                 '  SERVICE <https://query.wikidata.org/sparql>{OPTIONAL {?wikientity  wdt:P18 ?photo.}}\n' +
-                '} GROUP BY ?diburi ?vturi ?name ?fullnamestring ?wikientity'
+                '} GROUP BY ?diburi ?vturi ?name ?fullnamestring ?wikientity\n' +
+                'ORDER BY(UCASE(str(?fullnamestring)))'
           }),
           {
             headers: {
@@ -68,8 +96,6 @@ export default {
           }
       );
       this.posts = response.data
-      console.log(response.data)
-      console.log("wowee")
       this.isFetched = true
     } catch (e) {
       this.errors.push(e)
@@ -108,7 +134,7 @@ export default {
 
 .v-enter-active,
 .v-leave-active {
-  transition: opacity 0.5s ease;
+  transition: opacity 2s ease;
 }
 
 .v-enter-from,

@@ -5,23 +5,25 @@ PREFIX b2022: <https://ont.virtualtreasury.ie/ontology#>
 PREFIX rdfs:  <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX owl:<http://www.w3.org/2002/07/owl#>
 PREFIX wdt: <http://www.wikidata.org/prop/direct/>
-SELECT ?s ?o ?name ?fullnamestring ?wikientity (GROUP_CONCAT(DISTINCT ?photo; SEPARATOR=", ") AS ?photos)
+SELECT ?diburi ?vturi ?name ?fullnamestring ?wikientity (GROUP_CONCAT(DISTINCT ?photo; SEPARATOR=", ") AS ?photos)
 WHERE
 {
-  {SELECT ?s ?o ?name ?fullnamestring ?wikientity
+  {SELECT ?diburi ?vturi ?name ?fullnamestring ?wikientity
   WHERE{
-  ?s cidoc:P71_lists ?o.
-  ?s cidoc:P2_has_type b2022:DIB.
-  ?o cidoc:P1_is_identified_by ?name.
-  ?name rdfs:label ?fullnamestring.
-  ?o owl:sameAs ?wikientity.
+  ?diburi cidoc:P71_lists ?vturi.
+  ?diburi cidoc:P2_has_type b2022:DIB.
+  ?vturi cidoc:P1_is_identified_by ?name.
+  ?name rdfs:label ?fullname.
+  ?vturi owl:sameAs ?wikientity.
   FILTER(CONTAINS(?fullnamestring, ", ")).
-  FILTER(regex(str(?s), "www.dib.ie" ) ).
-  }order by asc(UCASE(str(?fullnamestring)))
-	LIMIT 10
-	OFFSET 0}
+  BIND(REPLACE(STR(?fullname), "\\(|\\)", "", "i") AS ?fullnamestring).
+  FILTER(regex(str(?diburi), "www.dib.ie" ) ).
+  }ORDER BY(UCASE(str(?fullnamestring)))
+LIMIT 12
+OFFSET 0}
   SERVICE <https://query.wikidata.org/sparql>{OPTIONAL {?wikientity  wdt:P18 ?photo.}}
-} GROUP BY ?s ?o ?name ?fullnamestring ?wikientity
+} GROUP BY ?diburi ?vturi ?name ?fullnamestring ?wikientity
+ORDER BY(UCASE(str(?fullnamestring)))
 
 # on wikidata for getting image
 SELECT *
