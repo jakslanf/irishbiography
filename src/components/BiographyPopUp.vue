@@ -10,8 +10,11 @@
         <p>Click on the Virtual Treasury and WikiData tabs to approve facts</p>
         <p>Approved facts will then appear here on this page!</p>
       </div>
+      <div v-if="tab=='treasury'">
+      <slot name="treasury"/>
+      </div>
       <div v-if="tab=='wikidata'">
-      <slot name="wikidata"/>
+        <slot name="wikidata"/>
       </div>
       <br/>
       <button @click="() => close()" class="popup-close">Close Popup</button>

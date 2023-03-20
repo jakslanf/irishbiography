@@ -7,23 +7,36 @@
         <button @click="isPopUp = true">Open Popup</button>
         <BiographyPopUp v-if="isPopUp" @close="togglePopUp">
           <template v-slot:header>
-            <h1>{{popUpInfo.name}}</h1>
+            <h1>{{ popUpInfo.name }}</h1>
             <img :src=popUpInfo.imageUrl width="200" height="200" v-if="popUpInfo.imageUrl != ''">
-            </template>
+          </template>
           <template v-slot:wikidata>
-
-          <div v-if="popUpInfo.isWikiDataFetched">
-            <h2>According to WikiData <a :href="popUpInfo.wikiLink">(View Here)</a>:</h2>
-            <div v-for="item in popUpInfo.wikiData.results.bindings">
-              <b><button>Approve</button>
-                <a :href="item.prop.value">{{item.propLabel.value}}</a>: <a :href="item.value.value">{{item.valueLabel.value}}</a></b>
+            <div v-if="popUpInfo.isWikiDataFetched">
+              <h2>According to WikiData <a :href="popUpInfo.wikiLink">(View Here)</a>:</h2>
+              <div v-for="item in popUpInfo.wikiData.results.bindings">
+                <b>
+                  <button>Approve</button>
+                  <a :href="item.prop.value">{{ item.propLabel.value }}</a>: <a
+                    :href="item.value.value">{{ item.valueLabel.value }}</a></b>
+              </div>
             </div>
-          </div>
+          </template>
+          <template v-slot:treasury>
+            <div v-if="popUpInfo.isVtDataFetched">
+              <h2>According to the VirtualTreasury <a :href="popUpInfo.vtLink">(View Here)</a>:</h2>
+              <div v-for="item in popUpInfo.vtData.results.bindings">
+                <b>
+                  <button>Approve</button>
+                  <a :href="item.prop.value">{{ getVtPropertyLabel(item.prop.value) }}</a>: <a
+                    :href="item.value.value">{{ item.label.value }}</a></b>
+              </div>
+            </div>
           </template>
         </BiographyPopUp>
         <div id="dash">
           <div id="individual" v-for="item in posts.results.bindings">
-            <BiographyItem @click="getPopUp(item)" :full-name="item.fullnamestring.value" :photo="item.photos.value.split(',')[0]"/>
+            <BiographyItem @click="getPopUp(item)" :full-name="item.fullnamestring.value"
+                           :photo="item.photos.value.split(',')[0]"/>
           </div>
         </div>
       </div>
@@ -101,8 +114,8 @@ export default {
                   '\n' +
                   'SELECT *\n' +
                   'WHERE{\n' +
-                  '  {<'+ item.vturi.value +'> ?prop ?value.} UNION\n' +
-                  '  {?value ?prop <'+ item.vturi.value +'>.}\n' +
+                  '  {<' + item.vturi.value + '> ?prop ?value.} UNION\n' +
+                  '  {?value ?prop <' + item.vturi.value + '>.}\n' +
                   '  ?value rdfs:label ?label.\n' +
                   '}\n'
             }),
@@ -129,7 +142,7 @@ export default {
                   '# valueLabel is only useful for properties with item-datatype\n' +
                   'WHERE\n' +
                   '{\n' +
-                  '  <'+ item.wikientity.value +'> ?p ?value\n' +
+                  '  <' + item.wikientity.value + '> ?p ?value\n' +
                   '  # change P1800 to another property\n' +
                   '  SERVICE wikibase:label { bd:serviceParam wikibase:language "en". }\n' +
                   '  VALUES ?p {\n' +
@@ -170,6 +183,20 @@ export default {
       } catch (e) {
         this.errors.push(e)
       }
+    },
+    getVtPropertyLabel(property) {
+      switch(String(property)) {
+        case "https://ont.virtualtreasury.ie/ontology#DIB_area_of_interest":
+          return "Area of Interest"
+        case "http://erlangen-crm.org/current/P1_is_identified_by":
+          return "Identified By"
+        case "http://erlangen-crm.org/current/P107_has_current_or_former_member":
+          return "Current/Former Member"
+        case "http://erlangen-crm.org/current/P71_lists":
+            return "Listed in"
+        default:
+          return String(property)
+      }
     }
   },
 
@@ -200,7 +227,7 @@ export default {
                 '  FILTER(regex(str(?diburi), "www.dib.ie" ) ).\n' +
                 '  }ORDER BY(UCASE(str(?fullnamestring)))\n' +
                 'LIMIT ' + this.limit.toString() + '\n' +
-                'OFFSET'+ (this.offset*12).toString() + '}\n' +
+                'OFFSET' + (this.offset * 12).toString() + '}\n' +
                 '  SERVICE <https://query.wikidata.org/sparql>{OPTIONAL {?wikientity  wdt:P18 ?photo.}}\n' +
                 '} GROUP BY ?diburi ?vturi ?name ?fullnamestring ?wikientity\n' +
                 'ORDER BY(UCASE(str(?fullnamestring)))'
