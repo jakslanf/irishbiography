@@ -28,3 +28,57 @@ ORDER BY(UCASE(str(?fullnamestring)))
 # on wikidata for getting image
 SELECT *
 WHERE { <http://www.wikidata.org/entity/Q30875> wdt:P18 ?x} LIMIT 1
+
+
+# Sample to query all values of a property
+
+# Sample to query all values of a property
+# Property talk pages on Wikidata include basic queries adapted to each property
+# ?prop ?propLabel ?value ?valueLabel ?p
+SELECT
+  DISTINCT ?prop ?p ?propLabel ?value ?valueLabel
+# valueLabel is only useful for properties with item-datatype
+WHERE
+{
+  <http://www.wikidata.org/entity/Q30875> ?p ?value
+  # change P1800 to another property
+  SERVICE wikibase:label { bd:serviceParam wikibase:language "en". }
+  VALUES ?p {
+    wdt:P19
+    wdt:P21
+    wdt:P22
+    wdt:P25
+    wdt:P26
+    wdt:P27
+    wdt:P39
+    wdt:P40
+    wdt:P69
+    wdt:P97
+    wdt:P102
+    wdt:P106
+    wdt:P108
+    wdt:P140
+    wdt:P800
+    wdt:P485
+    wdt:P451
+    wdt:P166
+    wdt:P213
+  }
+  ?prop wikibase:directClaim ?p
+}ORDER BY ?prop
+# remove or change limit for more results
+LIMIT 100
+
+## Querying VT for additional information
+PREFIX cidoc: <http://erlangen-crm.org/current/>
+PREFIX b2022: <https://ont.virtualtreasury.ie/ontology#>
+PREFIX rdfs:  <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX owl:<http://www.w3.org/2002/07/owl#>
+PREFIX wdt: <http://www.wikidata.org/prop/direct/>
+
+SELECT *
+WHERE{
+  {<https://kb.virtualtreasury.ie/person/Adams_William-George-Stewart_c20_dib_a0029> ?prop ?value.} UNION
+  {?value ?prop <https://kb.virtualtreasury.ie/person/Adams_William-George-Stewart_c20_dib_a0029>.}
+  ?value rdfs:label ?label.
+}

@@ -6,20 +6,12 @@
       <div v-if="isFetched">
         <button @click="isPopUp = true">Open Popup</button>
         <BiographyPopUp v-if="isPopUp" @close="togglePopUp">
-          <h1>Lorem Ipsum</h1>
-          <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent magna ipsum, tincidunt quis viverra vel,
-            egestas et eros. Donec nec hendrerit erat, ut fringilla ipsum. Nam ipsum orci, rhoncus vel ullamcorper in,
-            mattis eu sapien. Etiam vulputate porttitor quam, a bibendum diam ultricies non. Morbi egestas ex sed purus
-            molestie, ac fringilla erat interdum. Nunc augue lacus, tempus eget ultrices quis, semper non nisl. Aenean
-            sed sollicitudin lorem. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis
-            egestas. Etiam neque est, lacinia ut metus vel, molestie tempor massa. Sed et ante sit amet metus fermentum
-            hendrerit eu eget neque. Cras maximus, odio in pharetra fringilla, tortor massa imperdiet purus, eu luctus
-            elit lorem sit amet ipsum. Pellentesque eget nibh ac diam porta vulputate eget vitae lectus. Nulla varius
-            fermentum arcu, sed ultrices magna maximus sed.</p>
+          <h1>Lorem Ipsum (1902-1920)</h1>
+          <p>Occupation:<br>Spouse<br>Residence<br></p>
         </BiographyPopUp>
         <div id="dash">
           <div id="individual" v-for="item in posts.results.bindings">
-            <BiographyItem @click="getPopUp(item)" :full-name="item.fullnamestring.value" :photo="item.photos.value"/>
+            <BiographyItem @click="getPopUp(item)" :full-name="item.fullnamestring.value" :photo="item.photos.value.split(',')[0]"/>
           </div>
         </div>
       </div>
@@ -43,24 +35,114 @@ export default {
       BiographyPopUp,
       isPopUp: false,
       isFetched: false,
-      offset: 0,
+      isPopUpFetched: false,
+      offset: 40,
+      limit: 12,
       posts: [],
-      errors: []
+      errors: [],
+      popUpInfo: {
+        name: "Loading...",
+        vtData: [],
+        wikiData: []
+      }
     }
   }, methods: {
     getPopUp(item) {
-      console.log(item.fullnamestring.value)
+      this.isPopUpFetched = false
+      this.getVtData(item)
       this.togglePopUp()
     },
     togglePopUp() {
       this.isPopUp = !this.isPopUp
+    },
+    async getVtData(item) {
+      try {
+        const response = await axios.post(
+            'http://localhost:80/blazegraph/namespace/BeyondSample/sparql/',
+            new URLSearchParams({
+              'query': '## Querying VT for additional information\n' +
+                  'PREFIX cidoc: <http://erlangen-crm.org/current/>\n' +
+                  'PREFIX b2022: <https://ont.virtualtreasury.ie/ontology#>\n' +
+                  'PREFIX rdfs:  <http://www.w3.org/2000/01/rdf-schema#>\n' +
+                  'PREFIX owl:<http://www.w3.org/2002/07/owl#>\n' +
+                  'PREFIX wdt: <http://www.wikidata.org/prop/direct/>\n' +
+                  '\n' +
+                  'SELECT *\n' +
+                  'WHERE{\n' +
+                  '  {<'+ item.vturi.value +'> ?prop ?value.} UNION\n' +
+                  '  {?value ?prop <'+ item.vturi.value +'>.}\n' +
+                  '  ?value rdfs:label ?label.\n' +
+                  '}\n'
+            }),
+            {
+              headers: {
+                'Accept': 'application/json'
+              }
+            }
+        );
+        console.log(response.data)
+        this.isPopUpFetched = true
+      } catch (e) {
+        this.errors.push(e)
+      }
+    },
+    async getWikiData(item) {
+      try {
+        const response = await axios.post(
+            'http://localhost:80/blazegraph/namespace/BeyondSample/sparql/',
+            new URLSearchParams({
+              'query': 'SELECT\n' +
+                  '  DISTINCT ?prop ?p ?propLabel ?value ?valueLabel\n' +
+                  '# valueLabel is only useful for properties with item-datatype\n' +
+                  'WHERE\n' +
+                  '{\n' +
+                  '  <'+ item.wikientity.value +'> ?p ?value\n' +
+                  '  # change P1800 to another property\n' +
+                  '  SERVICE wikibase:label { bd:serviceParam wikibase:language "en". }\n' +
+                  '  VALUES ?p {\n' +
+                  '    wdt:P19\n' +
+                  '    wdt:P21\n' +
+                  '    wdt:P22\n' +
+                  '    wdt:P25\n' +
+                  '    wdt:P26\n' +
+                  '    wdt:P27\n' +
+                  '    wdt:P39\n' +
+                  '    wdt:P40\n' +
+                  '    wdt:P69\n' +
+                  '    wdt:P97\n' +
+                  '    wdt:P102\n' +
+                  '    wdt:P106\n' +
+                  '    wdt:P108\n' +
+                  '    wdt:P140\n' +
+                  '    wdt:P800\n' +
+                  '    wdt:P485\n' +
+                  '    wdt:P451\n' +
+                  '    wdt:P166\n' +
+                  '    wdt:P213\n' +
+                  '  }\n' +
+                  '  ?prop wikibase:directClaim ?p\n' +
+                  '}ORDER BY ?prop\n' +
+                  '# remove or change limit for more results\n' +
+                  'LIMIT 100'
+            }),
+            {
+              headers: {
+                'Accept': 'application/json'
+              }
+            }
+        );
+        console.log(response.data)
+        this.isPopUpFetched = true
+      } catch (e) {
+        this.errors.push(e)
+      }
     }
   },
 
   // Fetches posts when the component is created.
   async created() {
     try {
-      console.log("zowee")
+      this.limit
       const response = await axios.post(
           'http://localhost:80/blazegraph/namespace/BeyondSample/sparql/',
           new URLSearchParams({
@@ -83,8 +165,8 @@ export default {
                 '  BIND(REPLACE(STR(?fullname), "\\\\(|\\\\)", "", "i") AS ?fullnamestring).\n' +
                 '  FILTER(regex(str(?diburi), "www.dib.ie" ) ).\n' +
                 '  }ORDER BY(UCASE(str(?fullnamestring)))\n' +
-                'LIMIT 12\n' +
-                'OFFSET 0}\n' +
+                'LIMIT ' + this.limit.toString() + '\n' +
+                'OFFSET'+ (this.offset*12).toString() + '}\n' +
                 '  SERVICE <https://query.wikidata.org/sparql>{OPTIONAL {?wikientity  wdt:P18 ?photo.}}\n' +
                 '} GROUP BY ?diburi ?vturi ?name ?fullnamestring ?wikientity\n' +
                 'ORDER BY(UCASE(str(?fullnamestring)))'
@@ -96,6 +178,7 @@ export default {
           }
       );
       this.posts = response.data
+      console.log(this.posts)
       this.isFetched = true
     } catch (e) {
       this.errors.push(e)
