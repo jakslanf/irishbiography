@@ -6,6 +6,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
+    "host": "vite --host 0.0.0.0",
     "blazegraph": "java -server -Xmx4g -jar blazegraph.jar"
   },
   "dependencies": {

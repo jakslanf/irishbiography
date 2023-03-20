@@ -61,7 +61,7 @@ export default {
       isPopUp: false,
       isFetched: false,
       isPopUpFetched: false,
-      offset: 1,
+      offset: 40,
       limit: 12,
       posts: [],
       errors: [],
