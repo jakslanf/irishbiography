@@ -1,7 +1,19 @@
 <template>
   <div class="popup">
     <div class="popup-inner">
-      <slot/>
+      <slot name="header"/>
+      <br/>
+      <button @click="() => view('approved')" class="popup-tab">Approved</button>
+      <button @click="() => view('treasury')" class="popup-tab">Virtual Treasury</button>
+      <button @click="() => view('wikidata')" class="popup-tab">WikiData</button>
+      <div v-if="tab=='approved'">
+        <p>Click on the Virtual Treasury and WikiData tabs to approve facts</p>
+        <p>Approved facts will then appear here on this page!</p>
+      </div>
+      <div v-if="tab=='wikidata'">
+      <slot name="wikidata"/>
+      </div>
+      <br/>
       <button @click="() => close()" class="popup-close">Close Popup</button>
     </div>
   </div>
@@ -10,11 +22,19 @@
 <script>
 export default {
   name: "BiographyPopUp",
+  data() {
+    return {
+      tab: 'approved'
+    }},
   methods: {
     close() {
       this.$emit('close');
+    },
+    view(string) {
+      this.tab = string
     }
   }
+
 
 }
 </script>

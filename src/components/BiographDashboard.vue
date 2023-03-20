@@ -6,8 +6,20 @@
       <div v-if="isFetched">
         <button @click="isPopUp = true">Open Popup</button>
         <BiographyPopUp v-if="isPopUp" @close="togglePopUp">
-          <h1>Lorem Ipsum (1902-1920)</h1>
-          <p>Occupation:<br>Spouse<br>Residence<br></p>
+          <template v-slot:header>
+            <h1>{{popUpInfo.name}}</h1>
+            <img :src=popUpInfo.imageUrl width="200" height="200" v-if="popUpInfo.imageUrl != ''">
+            </template>
+          <template v-slot:wikidata>
+
+          <div v-if="popUpInfo.isWikiDataFetched">
+            <h2>According to WikiData <a :href="popUpInfo.wikiLink">(View Here)</a>:</h2>
+            <div v-for="item in popUpInfo.wikiData.results.bindings">
+              <b><button>Approve</button>
+                <a :href="item.prop.value">{{item.propLabel.value}}</a>: <a :href="item.value.value">{{item.valueLabel.value}}</a></b>
+            </div>
+          </div>
+          </template>
         </BiographyPopUp>
         <div id="dash">
           <div id="individual" v-for="item in posts.results.bindings">
@@ -36,20 +48,40 @@ export default {
       isPopUp: false,
       isFetched: false,
       isPopUpFetched: false,
-      offset: 40,
+      offset: 1,
       limit: 12,
       posts: [],
       errors: [],
       popUpInfo: {
         name: "Loading...",
+        imageUrl: "",
         vtData: [],
-        wikiData: []
+        wikiData: [],
+        isVtDataFetched: false,
+        isWikiDataFetched: false,
+        wikiLink: "",
+        vtLink: "",
+        dibLink: "",
       }
     }
   }, methods: {
     getPopUp(item) {
+      this.popUpInfo.wikiLink = item.wikientity.value
+      this.popUpInfo.vtLink = item.vturi.value
+      this.popUpInfo.dibLink = item.diburi.value
+      this.popUpInfo.name = item.fullnamestring.value
+      if (item.photos.value === "") {
+        this.popUpInfo.imageUrl = ""
+      } else {
+        this.popUpInfo.imageUrl = item.photos.value.split(',')[0]
+      }
+      this.popUpInfo.imageUrl = item.photos.value.split(',')[0]
       this.isPopUpFetched = false
+      this.popUpInfo.isWikiDataFetched = false
+      this.popUpInfo.isVtDataFetched = false
       this.getVtData(item)
+      this.getWikiData(item)
+      this.isPopUpFetched = true
       this.togglePopUp()
     },
     togglePopUp() {
@@ -81,7 +113,8 @@ export default {
             }
         );
         console.log(response.data)
-        this.isPopUpFetched = true
+        this.popUpInfo.vtData = response.data
+        this.popUpInfo.isVtDataFetched = true;
       } catch (e) {
         this.errors.push(e)
       }
@@ -89,7 +122,7 @@ export default {
     async getWikiData(item) {
       try {
         const response = await axios.post(
-            'http://localhost:80/blazegraph/namespace/BeyondSample/sparql/',
+            'https://query.wikidata.org/sparql',
             new URLSearchParams({
               'query': 'SELECT\n' +
                   '  DISTINCT ?prop ?p ?propLabel ?value ?valueLabel\n' +
@@ -132,7 +165,8 @@ export default {
             }
         );
         console.log(response.data)
-        this.isPopUpFetched = true
+        this.popUpInfo.wikiData = response.data
+        this.popUpInfo.isWikiDataFetched = true;
       } catch (e) {
         this.errors.push(e)
       }
