@@ -4,11 +4,13 @@
     <pre>{{posts.results.bindings[2].fullnamestring.value}}</pre> -->
     <Transition>
       <div v-if="isFetched">
-        <button @click="isPopUp = true">Open Popup</button>
+        <button @click="backPage()">Previous Page</button>
+        <button @click="nextPage()">Next Page</button>
         <BiographyPopUp v-if="isPopUp" @close="togglePopUp">
           <template v-slot:header>
             <h1>{{ popUpInfo.name }}</h1>
             <img :src=popUpInfo.imageUrl width="200" height="200" v-if="popUpInfo.imageUrl != ''">
+            <h2><a :href="popUpInfo.dibLink">Read Biography on DIB</a></h2>
           </template>
           <template v-slot:wikidata>
             <div v-if="popUpInfo.isWikiDataFetched">
@@ -40,7 +42,7 @@
           </div>
         </div>
       </div>
-      <h1 v-else>Loading...</h1>
+      <h1 v-else v-if="!isInitialised">Loading...<br>Contact Finn if stuck at Loading</h1>
     </Transition>
   </div>
 </template>
@@ -58,10 +60,11 @@ export default {
     let posts = [];
     return {
       BiographyPopUp,
+      isInitialised: false,
       isPopUp: false,
       isFetched: false,
       isPopUpFetched: false,
-      offset: 40,
+      offset: 0,
       limit: 12,
       posts: [],
       errors: [],
@@ -99,6 +102,22 @@ export default {
     },
     togglePopUp() {
       this.isPopUp = !this.isPopUp
+    },
+    nextPage()
+    {
+      this.isFetched = false
+      this.offset = this.offset + 1
+      this.getDashItems()
+    },
+    backPage()
+    {
+      this.isFetched = false
+      this.offset = this.offset - 1
+      if (this.offset < 0)
+      {
+        this.offset = 0
+      }
+      this.getDashItems()
     },
     async getVtData(item) {
       try {
@@ -184,24 +203,8 @@ export default {
         this.errors.push(e)
       }
     },
-    getVtPropertyLabel(property) {
-      switch(String(property)) {
-        case "https://ont.virtualtreasury.ie/ontology#DIB_area_of_interest":
-          return "Area of Interest"
-        case "http://erlangen-crm.org/current/P1_is_identified_by":
-          return "Identified By"
-        case "http://erlangen-crm.org/current/P107_has_current_or_former_member":
-          return "Current/Former Member"
-        case "http://erlangen-crm.org/current/P71_lists":
-            return "Listed in"
-        default:
-          return String(property)
-      }
-    }
-  },
-
-  // Fetches posts when the component is created.
-  async created() {
+  async getDashItems()
+  {
     try {
       this.limit
       const response = await axios.post(
@@ -241,16 +244,37 @@ export default {
       this.posts = response.data
       console.log(this.posts)
       this.isFetched = true
+      this.isInitialised = true
     } catch (e) {
       this.errors.push(e)
     }
+  },
+    getVtPropertyLabel(property) {
+      switch(String(property)) {
+        case "https://ont.virtualtreasury.ie/ontology#DIB_area_of_interest":
+          return "Area of Interest"
+        case "http://erlangen-crm.org/current/P1_is_identified_by":
+          return "Identified By"
+        case "http://erlangen-crm.org/current/P107_has_current_or_former_member":
+          return "Current/Former Member"
+        case "http://erlangen-crm.org/current/P71_lists":
+            return "Listed in"
+        default:
+          return String(property)
+      }
+    }
+  },
+
+  // Fetches posts when the component is created.
+  async created() {
+    this.getDashItems()
   },
 }
 </script>
 
 <style scoped>
 #dash {
-  background-color: green;
+  background-color: #D3D3D3;
   height: 900px;
   width: 1000px;
   padding: 10px;
