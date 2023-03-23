@@ -274,7 +274,7 @@ export default {
 
 <style scoped>
 #dash {
-  background-color: #D3D3D3;
+  background-color: #3b3b3b;
   height: 900px;
   width: 1000px;
   padding: 10px;
@@ -284,6 +284,7 @@ export default {
 
 #individual {
   background-color: #5A5A5A;
+  color: white;
   width: 230px;
   height: 250px;
   float: left;
