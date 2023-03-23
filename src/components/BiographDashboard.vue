@@ -6,7 +6,7 @@
       <div v-if="isFetched">
         <button @click="backPage()">Previous Page</button>
         <button @click="nextPage()">Next Page</button>
-        <input v-model="searchString" placeholder="Search Names" />
+        <input v-model="searchString" placeholder="Search Names"/>
         <button @click="goSearch()">Search</button>
         <BiographyPopUp v-if="isPopUp" @close="togglePopUp">
           <template v-slot:header>
@@ -106,24 +106,20 @@ export default {
     togglePopUp() {
       this.isPopUp = !this.isPopUp
     },
-    goSearch()
-    {
+    goSearch() {
       this.offset = 0
       this.isFetched = false
       this.getDashItems()
     },
-    nextPage()
-    {
+    nextPage() {
       this.isFetched = false
       this.offset = this.offset + 1
       this.getDashItems()
     },
-    backPage()
-    {
+    backPage() {
       this.isFetched = false
       this.offset = this.offset - 1
-      if (this.offset < 0)
-      {
+      if (this.offset < 0) {
         this.offset = 0
       }
       this.getDashItems()
@@ -212,55 +208,54 @@ export default {
         this.errors.push(e)
       }
     },
-  async getDashItems()
-  {
-    try {
-      this.limit
-      const response = await axios.post(
-          'http://localhost:80/blazegraph/namespace/BeyondSample/sparql/',
-          new URLSearchParams({
-            'query': 'PREFIX cidoc: <http://erlangen-crm.org/current/>\n' +
-                'PREFIX b2022: <https://ont.virtualtreasury.ie/ontology#>\n' +
-                'PREFIX rdfs:  <http://www.w3.org/2000/01/rdf-schema#>\n' +
-                'PREFIX owl:<http://www.w3.org/2002/07/owl#>\n' +
-                'PREFIX wdt: <http://www.wikidata.org/prop/direct/>\n' +
-                'SELECT ?diburi ?vturi ?name ?fullnamestring ?wikientity (GROUP_CONCAT(DISTINCT ?photo; SEPARATOR=", ") AS ?photos)\n' +
-                'WHERE\n' +
-                '{\n' +
-                '  {SELECT ?diburi ?vturi ?name ?fullnamestring ?wikientity\n' +
-                '  WHERE{\n' +
-                'FILTER(CONTAINS(UCASE(STR(?fullnamestring)),UCASE(STR("' + this.searchString + '"))))' +
-                '  ?diburi cidoc:P71_lists ?vturi.\n' +
-                '  ?diburi cidoc:P2_has_type b2022:DIB.\n' +
-                '  ?vturi cidoc:P1_is_identified_by ?name.\n' +
-                '  ?name rdfs:label ?fullname.\n' +
-                '  ?vturi owl:sameAs ?wikientity.\n' +
-                '  FILTER(CONTAINS(?fullnamestring, ", ")).\n' +
-                '  BIND(REPLACE(STR(?fullname), "\\\\(|\\\\)", "", "i") AS ?fullnamestring).\n' +
-                '  FILTER(regex(str(?diburi), "www.dib.ie" ) ).\n' +
-                '  }ORDER BY(UCASE(str(?fullnamestring)))\n' +
-                'LIMIT ' + this.limit.toString() + '\n' +
-                'OFFSET' + (this.offset * 12).toString() + '}\n' +
-                '  SERVICE <https://query.wikidata.org/sparql>{OPTIONAL {?wikientity  wdt:P18 ?photo.}}\n' +
-                '} GROUP BY ?diburi ?vturi ?name ?fullnamestring ?wikientity\n' +
-                'ORDER BY(UCASE(str(?fullnamestring)))'
-          }),
-          {
-            headers: {
-              'Accept': 'application/json'
+    async getDashItems() {
+      try {
+        this.limit
+        const response = await axios.post(
+            'http://localhost:80/blazegraph/namespace/BeyondSample/sparql/',
+            new URLSearchParams({
+              'query': 'PREFIX cidoc: <http://erlangen-crm.org/current/>\n' +
+                  'PREFIX b2022: <https://ont.virtualtreasury.ie/ontology#>\n' +
+                  'PREFIX rdfs:  <http://www.w3.org/2000/01/rdf-schema#>\n' +
+                  'PREFIX owl:<http://www.w3.org/2002/07/owl#>\n' +
+                  'PREFIX wdt: <http://www.wikidata.org/prop/direct/>\n' +
+                  'SELECT ?diburi ?vturi ?name ?fullnamestring ?wikientity (GROUP_CONCAT(DISTINCT ?photo; SEPARATOR=", ") AS ?photos)\n' +
+                  'WHERE\n' +
+                  '{\n' +
+                  '  {SELECT ?diburi ?vturi ?name ?fullnamestring ?wikientity\n' +
+                  '  WHERE{\n' +
+                  'FILTER(CONTAINS(UCASE(STR(?fullnamestring)),UCASE(STR("' + this.searchString + '"))))' +
+                  '  ?diburi cidoc:P71_lists ?vturi.\n' +
+                  '  ?diburi cidoc:P2_has_type b2022:DIB.\n' +
+                  '  ?vturi cidoc:P1_is_identified_by ?name.\n' +
+                  '  ?name rdfs:label ?fullname.\n' +
+                  '  ?vturi owl:sameAs ?wikientity.\n' +
+                  '  FILTER(CONTAINS(?fullnamestring, ", ")).\n' +
+                  '  BIND(REPLACE(STR(?fullname), "\\\\(|\\\\)", "", "i") AS ?fullnamestring).\n' +
+                  '  FILTER(regex(str(?diburi), "www.dib.ie" ) ).\n' +
+                  '  }ORDER BY(UCASE(str(?fullnamestring)))\n' +
+                  'LIMIT ' + this.limit.toString() + '\n' +
+                  'OFFSET' + (this.offset * 12).toString() + '}\n' +
+                  '  SERVICE <https://query.wikidata.org/sparql>{OPTIONAL {?wikientity  wdt:P18 ?photo.}}\n' +
+                  '} GROUP BY ?diburi ?vturi ?name ?fullnamestring ?wikientity\n' +
+                  'ORDER BY(UCASE(str(?fullnamestring)))'
+            }),
+            {
+              headers: {
+                'Accept': 'application/json'
+              }
             }
-          }
-      );
-      this.posts = response.data
-      console.log(this.posts)
-      this.isFetched = true
-      this.isInitialised = true
-    } catch (e) {
-      this.errors.push(e)
-    }
-  },
+        );
+        this.posts = response.data
+        console.log(this.posts)
+        this.isFetched = true
+        this.isInitialised = true
+      } catch (e) {
+        this.errors.push(e)
+      }
+    },
     getVtPropertyLabel(property) {
-      switch(String(property)) {
+      switch (String(property)) {
         case "https://ont.virtualtreasury.ie/ontology#DIB_area_of_interest":
           return "Area of Interest"
         case "http://erlangen-crm.org/current/P1_is_identified_by":
@@ -268,7 +263,7 @@ export default {
         case "http://erlangen-crm.org/current/P107_has_current_or_former_member":
           return "Current/Former Member"
         case "http://erlangen-crm.org/current/P71_lists":
-            return "Listed in"
+          return "Listed in"
         default:
           return String(property)
       }

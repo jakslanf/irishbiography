@@ -11,7 +11,7 @@
         <p>Approved facts will then appear here on this page!</p>
       </div>
       <div v-if="tab=='treasury'">
-      <slot name="treasury"/>
+        <slot name="treasury"/>
       </div>
       <div v-if="tab=='wikidata'">
         <slot name="wikidata"/>
@@ -28,7 +28,8 @@ export default {
   data() {
     return {
       tab: 'approved'
-    }},
+    }
+  },
   methods: {
     close() {
       this.$emit('close');
