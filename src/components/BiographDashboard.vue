@@ -6,6 +6,8 @@
       <div v-if="isFetched">
         <button @click="backPage()">Previous Page</button>
         <button @click="nextPage()">Next Page</button>
+        <input v-model="searchString" placeholder="Search Names" />
+        <button @click="goSearch()">Search</button>
         <BiographyPopUp v-if="isPopUp" @close="togglePopUp">
           <template v-slot:header>
             <h1>{{ popUpInfo.name }}</h1>
@@ -64,6 +66,7 @@ export default {
       isPopUp: false,
       isFetched: false,
       isPopUpFetched: false,
+      searchString: "",
       offset: 0,
       limit: 12,
       posts: [],
@@ -102,6 +105,12 @@ export default {
     },
     togglePopUp() {
       this.isPopUp = !this.isPopUp
+    },
+    goSearch()
+    {
+      this.offset = 0
+      this.isFetched = false
+      this.getDashItems()
     },
     nextPage()
     {
@@ -220,6 +229,7 @@ export default {
                 '{\n' +
                 '  {SELECT ?diburi ?vturi ?name ?fullnamestring ?wikientity\n' +
                 '  WHERE{\n' +
+                'FILTER(CONTAINS(UCASE(STR(?fullnamestring)),UCASE(STR("' + this.searchString + '"))))' +
                 '  ?diburi cidoc:P71_lists ?vturi.\n' +
                 '  ?diburi cidoc:P2_has_type b2022:DIB.\n' +
                 '  ?vturi cidoc:P1_is_identified_by ?name.\n' +

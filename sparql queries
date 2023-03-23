@@ -10,6 +10,7 @@ WHERE
 {
   {SELECT ?diburi ?vturi ?name ?fullnamestring ?wikientity
   WHERE{
+  FILTER(CONTAINS(UCASE(STR(?fullnamestring)),UCASE(STR(""))))
   ?diburi cidoc:P71_lists ?vturi.
   ?diburi cidoc:P2_has_type b2022:DIB.
   ?vturi cidoc:P1_is_identified_by ?name.
