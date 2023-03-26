@@ -7,6 +7,7 @@ import vue from '@vitejs/plugin-vue'
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  base: 'https://jakslanf.github.io/irishbiography/',
   plugins: [vue()],
   resolve: {
     alias: {
