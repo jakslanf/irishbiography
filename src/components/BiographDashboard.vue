@@ -127,7 +127,7 @@ export default {
     async getVtData(item) {
       try {
         const response = await axios.post(
-            'http://34.254.162.106:80/blazegraph/namespace/BeyondSample/sparql/',
+            'https://34.254.162.106:80/blazegraph/namespace/BeyondSample/sparql/',
             new URLSearchParams({
               'query': '## Querying VT for additional information\n' +
                   'PREFIX cidoc: <http://erlangen-crm.org/current/>\n' +
@@ -212,7 +212,7 @@ export default {
       try {
         this.limit
         const response = await axios.post(
-            'http://34.254.162.106:80/blazegraph/namespace/BeyondSample/sparql/',
+            'https://34.254.162.106:80/blazegraph/namespace/BeyondSample/sparql/',
             new URLSearchParams({
               'query': 'PREFIX cidoc: <http://erlangen-crm.org/current/>\n' +
                   'PREFIX b2022: <https://ont.virtualtreasury.ie/ontology#>\n' +
