@@ -19,7 +19,7 @@
               <h2>According to WikiData <a :href="popUpInfo.wikiLink">(View Here)</a>:</h2>
               <div v-for="item in popUpInfo.wikiData.results.bindings">
                 <b>
-                  <button>Approve</button>
+                  <button @click="approveTriple(item)">Approve</button>
                   <a :href="item.prop.value">{{ item.propLabel.value }}</a>: <a
                     :href="item.value.value">{{ item.valueLabel.value }}</a></b>
               </div>
@@ -30,7 +30,7 @@
               <h2>According to the VirtualTreasury <a :href="popUpInfo.vtLink">(View Here)</a>:</h2>
               <div v-for="item in popUpInfo.vtData.results.bindings">
                 <b>
-                  <button>Approve</button>
+                  <button @click="approveTriple(item)">Approve</button>
                   <a :href="item.prop.value">{{ getVtPropertyLabel(item.prop.value) }}</a>: <a
                     :href="item.value.value">{{ item.label.value }}</a></b>
               </div>
@@ -124,10 +124,35 @@ export default {
       }
       this.getDashItems()
     },
+    async approveTriple(item)
+    {
+      this.popUpInfo.vtLink
+      item.prop.value
+      item.value.value
+      try {
+        const response = await axios.post(
+            'http://localhost:80/blazegraph/namespace/PersonalGraph/sparql/',
+            new URLSearchParams({
+              'update': 'INSERT DATA {\n' +
+                  '  <'+ this.popUpInfo.vtLink +'> <' +item.prop.value+'> <'+item.value.value+'>.\n' +
+                  '}'
+            }),
+            {
+              headers: {
+                'Accept': 'application/json'
+              }
+            }
+        );
+        console.log(response.data)
+        console.log("Added triple")
+      } catch (e) {
+        this.errors.push(e)
+      }
+    },
     async getVtData(item) {
       try {
         const response = await axios.post(
-            'https://34.254.162.106:80/blazegraph/namespace/BeyondSample/sparql/',
+            'http://localhost:80/blazegraph/namespace/BeyondSample/sparql/',
             new URLSearchParams({
               'query': '## Querying VT for additional information\n' +
                   'PREFIX cidoc: <http://erlangen-crm.org/current/>\n' +
@@ -212,7 +237,7 @@ export default {
       try {
         this.limit
         const response = await axios.post(
-            'https://34.254.162.106:80/blazegraph/namespace/BeyondSample/sparql/',
+            'http://localhost:80/blazegraph/namespace/BeyondSample/sparql/',
             new URLSearchParams({
               'query': 'PREFIX cidoc: <http://erlangen-crm.org/current/>\n' +
                   'PREFIX b2022: <https://ont.virtualtreasury.ie/ontology#>\n' +

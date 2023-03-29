@@ -13,7 +13,7 @@ export default {
   data() {
     return {
       name: "BiographyItem",
-      displayphoto: "src/assets/no_img.png"
+      displayphoto: "/public/no_img.png"
     }
   },
   created() {
