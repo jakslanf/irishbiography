@@ -189,7 +189,7 @@ export default {
                   '  {<' + item.vturi.value + '> ?prop ?value.} UNION\n' +
                   '  {?value ?prop <' + item.vturi.value + '>.}\n' +
                   '  ?value rdfs:label ?label.\n' +
-                  '}\n'
+                  '} LIMIT 10\n'
             }),
             {
               headers: {
@@ -272,7 +272,7 @@ export default {
                   '  ?prop wikibase:directClaim ?p\n' +
                   '}ORDER BY ?prop\n' +
                   '# remove or change limit for more results\n' +
-                  'LIMIT 100'
+                  'LIMIT 10'
             }),
             {
               headers: {
