@@ -83,3 +83,16 @@ WHERE{
   {?value ?prop <https://kb.virtualtreasury.ie/person/Adams_William-George-Stewart_c20_dib_a0029>.}
   ?value rdfs:label ?label.
 }
+
+PREFIX cidoc: <http://erlangen-crm.org/current/>
+PREFIX b2022: <https://ont.virtualtreasury.ie/ontology#>
+PREFIX rdfs:  <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX owl:<http://www.w3.org/2002/07/owl#>
+PREFIX wdt: <http://www.wikidata.org/prop/direct/>
+
+SELECT DISTINCT ?area_of_interest_uri (SAMPLE(?area_of_interest_string) AS ?interest_name)
+WHERE{
+  ?person b2022:DIB_area_of_interest ?area_of_interest_uri.
+  ?area_of_interest_uri cidoc:P1_is_identified_by ?name.
+  ?name rdfs:label ?area_of_interest_string
+} GROUP BY(?area_of_interest_uri) ORDER BY ASC(UCASE(str(?area_of_interest_string)))

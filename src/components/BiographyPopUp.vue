@@ -9,6 +9,7 @@
       <div v-if="tab=='approved'">
         <p>Click on the Virtual Treasury and WikiData tabs to approve facts</p>
         <p>Approved facts will then appear here on this page!</p>
+        <slot name="approved"/>
       </div>
       <div v-if="tab=='treasury'">
         <slot name="treasury"/>

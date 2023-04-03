@@ -7,12 +7,28 @@
         <button @click="backPage()">Previous Page</button>
         <button @click="nextPage()">Next Page</button>
         <input v-model="searchString" placeholder="Search Names"/>
+        <select v-model="searchCategory">
+          <option value="">Select Area of Interest</option>
+          <option v-for="option in searchTerms.results.bindings" :value="option.area_of_interest_uri.value">
+            {{ option.interest_name.value }}
+          </option>
+        </select>
         <button @click="goSearch()">Search</button>
         <BiographyPopUp v-if="isPopUp" @close="togglePopUp">
           <template v-slot:header>
             <h1>{{ popUpInfo.name }}</h1>
             <img :src=popUpInfo.imageUrl width="200" height="200" v-if="popUpInfo.imageUrl != ''">
             <h2><a :href="popUpInfo.dibLink">Read Biography on DIB</a></h2>
+          </template>
+          <template v-slot:approved>
+            <div v-if="popUpInfo.isApprovedDataFetched">
+              <h2>Approved by historians:</h2>
+              <div v-for="item in popUpInfo.ApprovedData.results.bindings">
+                <b>
+                  <a :href="item.prop.value">{{ getVtPropertyLabel(item.prop.value) }}</a>: <a
+                    :href="item.value.value">{{ item.value.value }}</a></b>
+              </div>
+            </div>
           </template>
           <template v-slot:wikidata>
             <div v-if="popUpInfo.isWikiDataFetched">
@@ -38,6 +54,7 @@
           </template>
         </BiographyPopUp>
         <div id="dash">
+          <div v-if="!posts.results.bindings.length">No Person Found. Try a different search.</div>
           <div id="individual" v-for="item in posts.results.bindings">
             <BiographyItem @click="getPopUp(item)" :full-name="item.fullnamestring.value"
                            :photo="item.photos.value.split(',')[0]"/>
@@ -67,8 +84,10 @@ export default {
       isFetched: false,
       isPopUpFetched: false,
       searchString: "",
+      searchCategory: "",
       offset: 0,
       limit: 12,
+      searchTerms: [],
       posts: [],
       errors: [],
       popUpInfo: {
@@ -76,8 +95,10 @@ export default {
         imageUrl: "",
         vtData: [],
         wikiData: [],
+        approvedData: [],
         isVtDataFetched: false,
         isWikiDataFetched: false,
+        isApprovedDataFetched: false,
         wikiLink: "",
         vtLink: "",
         dibLink: "",
@@ -96,10 +117,12 @@ export default {
       }
       this.popUpInfo.imageUrl = item.photos.value.split(',')[0]
       this.isPopUpFetched = false
+      this.popUpInfo.isApprovedDataFetched = false
       this.popUpInfo.isWikiDataFetched = false
       this.popUpInfo.isVtDataFetched = false
       this.getVtData(item)
       this.getWikiData(item)
+      this.getApprovedData(item)
       this.isPopUpFetched = true
       this.togglePopUp()
     },
@@ -133,7 +156,7 @@ export default {
         const response = await axios.post(
             'http://localhost:80/blazegraph/namespace/PersonalGraph/sparql/',
             new URLSearchParams({
-              'update': 'INSERT DATA {\n' +
+              'update': 'PREFIX rdfs:  <http://www.w3.org/2000/01/rdf-schema#> INSERT DATA {\n' +
                   '  <'+ this.popUpInfo.vtLink +'> <' +item.prop.value+'> <'+item.value.value+'>.\n' +
                   '}'
             }),
@@ -177,6 +200,37 @@ export default {
         console.log(response.data)
         this.popUpInfo.vtData = response.data
         this.popUpInfo.isVtDataFetched = true;
+      } catch (e) {
+        this.errors.push(e)
+      }
+    },
+    async getApprovedData(item) {
+      try {
+        const response = await axios.post(
+            'http://localhost:80/blazegraph/namespace/PersonalGraph/sparql/',
+            new URLSearchParams({
+              'query': '## Querying VT for additional information\n' +
+                  'PREFIX cidoc: <http://erlangen-crm.org/current/>\n' +
+                  'PREFIX b2022: <https://ont.virtualtreasury.ie/ontology#>\n' +
+                  'PREFIX rdfs:  <http://www.w3.org/2000/01/rdf-schema#>\n' +
+                  'PREFIX owl:<http://www.w3.org/2002/07/owl#>\n' +
+                  'PREFIX wdt: <http://www.wikidata.org/prop/direct/>\n' +
+                  '\n' +
+                  'SELECT DISTINCT ?prop ?value ?label \n' +
+                  'WHERE{\n' +
+                  '<' + item.vturi.value + '> ?prop ?value.\n' +
+                  '}\n'
+            }),
+            {
+              headers: {
+                'Accept': 'application/json'
+              }
+            }
+        );
+        console.log("Approved Data")
+        console.log(response.data)
+        this.popUpInfo.ApprovedData = response.data
+        this.popUpInfo.isApprovedDataFetched = true;
       } catch (e) {
         this.errors.push(e)
       }
@@ -235,7 +289,12 @@ export default {
     },
     async getDashItems() {
       try {
-        this.limit
+        let tempString;
+        tempString = ""
+        if(this.searchCategory !== "")
+        {
+          tempString = '?vturi b2022:DIB_area_of_interest <' + this.searchCategory + '>.\n'
+        }
         const response = await axios.post(
             'http://localhost:80/blazegraph/namespace/BeyondSample/sparql/',
             new URLSearchParams({
@@ -249,13 +308,14 @@ export default {
                   '{\n' +
                   '  {SELECT ?diburi ?vturi ?name ?fullnamestring ?wikientity\n' +
                   '  WHERE{\n' +
-                  'FILTER(CONTAINS(UCASE(STR(?fullnamestring)),UCASE(STR("' + this.searchString + '"))))' +
+                  'FILTER(CONTAINS(UCASE(STR(?fullnamestring)),UCASE(STR("' + this.searchString + '")))).' +
                   '  ?diburi cidoc:P71_lists ?vturi.\n' +
                   '  ?diburi cidoc:P2_has_type b2022:DIB.\n' +
                   '  ?vturi cidoc:P1_is_identified_by ?name.\n' +
                   '  ?name rdfs:label ?fullname.\n' +
                   '  ?vturi owl:sameAs ?wikientity.\n' +
                   '  FILTER(CONTAINS(?fullnamestring, ", ")).\n' +
+                  tempString +
                   '  BIND(REPLACE(STR(?fullname), "\\\\(|\\\\)", "", "i") AS ?fullnamestring).\n' +
                   '  FILTER(regex(str(?diburi), "www.dib.ie" ) ).\n' +
                   '  }ORDER BY(UCASE(str(?fullnamestring)))\n' +
@@ -279,6 +339,36 @@ export default {
         this.errors.push(e)
       }
     },
+    async getAreasOfInterest() {
+      try {
+        const response = await axios.post(
+            'http://localhost:80/blazegraph/namespace/BeyondSample/sparql/',
+            new URLSearchParams({
+              'query': 'PREFIX cidoc: <http://erlangen-crm.org/current/>\n' +
+                  'PREFIX b2022: <https://ont.virtualtreasury.ie/ontology#>\n' +
+                  'PREFIX rdfs:  <http://www.w3.org/2000/01/rdf-schema#>\n' +
+                  'PREFIX owl:<http://www.w3.org/2002/07/owl#>\n' +
+                  'PREFIX wdt: <http://www.wikidata.org/prop/direct/>\n' +
+                  '\n' +
+                  'SELECT DISTINCT ?area_of_interest_uri (SAMPLE(?area_of_interest_string) AS ?interest_name)\n' +
+                  'WHERE{\n' +
+                  '  ?person b2022:DIB_area_of_interest ?area_of_interest_uri.\n' +
+                  '  ?area_of_interest_uri cidoc:P1_is_identified_by ?name.\n' +
+                  '  ?name rdfs:label ?area_of_interest_string\n' +
+                  '} GROUP BY(?area_of_interest_uri) ORDER BY ASC(UCASE(str(?area_of_interest_string))) '
+            }),
+            {
+              headers: {
+                'Accept': 'application/json'
+              }
+            }
+        );
+        this.searchTerms = response.data
+        console.log(this.searchTerms)
+      } catch (e) {
+        this.errors.push(e)
+      }
+    },
     getVtPropertyLabel(property) {
       switch (String(property)) {
         case "https://ont.virtualtreasury.ie/ontology#DIB_area_of_interest":
@@ -297,6 +387,7 @@ export default {
 
   // Fetches posts when the component is created.
   async created() {
+    this.getAreasOfInterest()
     this.getDashItems()
   },
 }
