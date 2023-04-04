@@ -26,7 +26,7 @@
               <div v-for="item in popUpInfo.ApprovedData.results.bindings">
                 <b>
                   <a :href="item.prop.value">{{ getVtPropertyLabel(item.prop.value) }}</a>: <a
-                    :href="item.value.value">{{ item.value.value }}</a></b>
+                    :href="item.value.value">{{ item.label.value }}</a></b>
               </div>
             </div>
           </template>
@@ -35,7 +35,7 @@
               <h2>According to WikiData <a :href="popUpInfo.wikiLink">(View Here)</a>:</h2>
               <div v-for="item in popUpInfo.wikiData.results.bindings">
                 <b>
-                  <button @click="approveTriple(item)">Approve</button>
+                  <button @click="approveTriple(item, item.valueLabel.value)">Approve</button>
                   <a :href="item.prop.value">{{ item.propLabel.value }}</a>: <a
                     :href="item.value.value">{{ item.valueLabel.value }}</a></b>
               </div>
@@ -46,7 +46,7 @@
               <h2>According to the VirtualTreasury <a :href="popUpInfo.vtLink">(View Here)</a>:</h2>
               <div v-for="item in popUpInfo.vtData.results.bindings">
                 <b>
-                  <button @click="approveTriple(item)">Approve</button>
+                  <button @click="approveTriple(item, item.label.value)">Approve</button>
                   <a :href="item.prop.value">{{ getVtPropertyLabel(item.prop.value) }}</a>: <a
                     :href="item.value.value">{{ item.label.value }}</a></b>
               </div>
@@ -147,7 +147,7 @@ export default {
       }
       this.getDashItems()
     },
-    async approveTriple(item)
+    async approveTriple(item, label)
     {
       this.popUpInfo.vtLink
       item.prop.value
@@ -158,6 +158,7 @@ export default {
             new URLSearchParams({
               'update': 'PREFIX rdfs:  <http://www.w3.org/2000/01/rdf-schema#> INSERT DATA {\n' +
                   '  <'+ this.popUpInfo.vtLink +'> <' +item.prop.value+'> <'+item.value.value+'>.\n' +
+                  '<'+item.value.value+'> rdfs:label "' + label +'".\n' +
                   '}'
             }),
             {
@@ -219,6 +220,7 @@ export default {
                   'SELECT DISTINCT ?prop ?value ?label \n' +
                   'WHERE{\n' +
                   '<' + item.vturi.value + '> ?prop ?value.\n' +
+                  '?value rdfs:label ?label.' +
                   '}\n'
             }),
             {
