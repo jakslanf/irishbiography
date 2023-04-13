@@ -169,7 +169,7 @@ export default {
                   '  ?prop wikibase:directClaim ?p\n' +
                   '}ORDER BY ?prop\n' +
                   '# remove or change limit for more results\n' +
-                  'LIMIT 100'
+                  'LIMIT 10'
             }),
             {
               headers: {
