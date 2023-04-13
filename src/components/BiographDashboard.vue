@@ -139,11 +139,9 @@ export default {
             new URLSearchParams({
               'query': 'SELECT\n' +
                   '  DISTINCT ?prop ?p ?propLabel ?value ?valueLabel\n' +
-                  '# valueLabel is only useful for properties with item-datatype\n' +
                   'WHERE\n' +
                   '{\n' +
                   '  <' + item.wikientity.value + '> ?p ?value\n' +
-                  '  # change P1800 to another property\n' +
                   '  SERVICE wikibase:label { bd:serviceParam wikibase:language "en". }\n' +
                   '  VALUES ?p {\n' +
                   '    wdt:P19\n' +
