@@ -169,15 +169,14 @@ export default {
       this.getDashItems()
     },
     // API call that inserts approved triples into the personal namespace
-    async approveTriple(item, label)
-    {
+    async approveTriple(item, label) {
       try {
         const response = await axios.post(
             'http://localhost:80/blazegraph/namespace/PersonalGraph/sparql/',
             new URLSearchParams({
               'update': 'PREFIX rdfs:  <http://www.w3.org/2000/01/rdf-schema#> INSERT DATA {\n' +
-                  '  <'+ this.popUpInfo.vtLink +'> <' +item.prop.value+'> <'+item.value.value+'>.\n' +
-                  '<'+item.value.value+'> rdfs:label "' + label +'".\n' +
+                  '  <' + this.popUpInfo.vtLink + '> <' + item.prop.value + '> <' + item.value.value + '>.\n' +
+                  '<' + item.value.value + '> rdfs:label "' + label + '".\n' +
                   '}'
             }),
             {
@@ -192,8 +191,7 @@ export default {
         this.errors.push(e)
       }
     },
-    async addProvenance(item)
-    {
+    async addProvenance(item) {
       // API call that inserts provenance related triples into the personal namespace
       try {
         var uniqueID = new Date().valueOf();
@@ -207,15 +205,15 @@ export default {
                   "@prefix prov: <http://www.w3.org/ns/prov#> .\n" +
                   "@prefix :     <http://example.org#> .\n" +
                   "\n" +
-                  ":approvalActivity"+ uniqueID +"\n" +
+                  ":approvalActivity" + uniqueID + "\n" +
                   "    a prov:Activity;\n" +
-                  "    :mentionsSubject <" + this.popUpInfo.vtLink +">;\n" +
-                  "    :mentionsObject <" + item.value.value +">;\n" +
-                  "    :mentionsRelationship <"+ item.prop.value +">;\n" +
+                  "    :mentionsSubject <" + this.popUpInfo.vtLink + ">;\n" +
+                  "    :mentionsObject <" + item.value.value + ">;\n" +
+                  "    :mentionsRelationship <" + item.prop.value + ">;\n" +
                   "    prov:wasAssociatedWith :historianWilde;\n" +
                   "    prov:wasGeneratedBy :webInterface;\n" +
-                  "    prov:startedAtTime '"+ timestamp +"'^^xsd:dateTime;\n" +
-                  "    prov:endedAtTime      '"+ timestamp +"'^^xsd:dateTime;\n" +
+                  "    prov:startedAtTime '" + timestamp + "'^^xsd:dateTime;\n" +
+                  "    prov:endedAtTime      '" + timestamp + "'^^xsd:dateTime;\n" +
                   ".\n" +
                   "\n" +
                   ":historianWilde\n" +
@@ -354,8 +352,7 @@ export default {
       try {
         let tempString;
         tempString = ""
-        if(this.searchCategory !== "")
-        {
+        if (this.searchCategory !== "") {
           tempString = '?vturi b2022:DIB_area_of_interest <' + this.searchCategory + '>.\n'
         }
         const response = await axios.post(
