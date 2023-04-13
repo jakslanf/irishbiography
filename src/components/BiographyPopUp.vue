@@ -3,6 +3,7 @@
     <div class="popup-inner">
       <slot name="header"/>
       <br/>
+      <!-- Tabs for each source of information -->
       <button @click="() => view('approved')" class="popup-tab">Approved</button>
       <button @click="() => view('treasury')" class="popup-tab">Virtual Treasury</button>
       <button @click="() => view('wikidata')" class="popup-tab">WikiData</button>
@@ -22,7 +23,6 @@
     </div>
   </div>
 </template>
-<!-- https://www.youtube.com/watch?v=HorXomQrOi8 -->
 <script>
 export default {
   name: "BiographyPopUp",

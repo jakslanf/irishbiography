@@ -87,31 +87,31 @@ export default {
     let posts = [];
     return {
       BiographyPopUp,
-      // <!-- Booleans used to ensure values are not displayed unless fully retrieved -->
+      // Booleans used to ensure values are not displayed unless fully retrieved
       isInitialised: false,
       isPopUp: false,
       isFetched: false,
       isPopUpFetched: false,
-      // <!-- Strings used by user for searching -->
+      // Strings used by user for searching
       searchString: "",
       searchCategory: "",
-      // <!-- What "page" of search results the dashboard is on -->
+      // What "page" of search results the dashboard is on
       offset: 0,
-      // <!-- How many items to display on a single page -->
+      // How many items to display on a single page
       limit: 12,
       searchTerms: [],
-      // <!-- API call results and errors in the two below -->
+      // API call results and errors in the two below
       posts: [],
       errors: [],
-      // <!-- Collection of values related to popups -->
+      // Collection of values related to popups
       popUpInfo: {
         name: "Loading...",
         imageUrl: "",
-        // <!-- Triples returned by API from each SPARQL endpoint -->
+        // Triples returned by API from each SPARQL endpoint
         vtData: [],
         wikiData: [],
         approvedData: [],
-        // <!-- Booleans to ensure properly retrieved before displaying -->
+        // Booleans to ensure properly retrieved before displaying
         isVtDataFetched: false,
         isWikiDataFetched: false,
         isApprovedDataFetched: false,
@@ -121,7 +121,7 @@ export default {
       }
     }
   }, methods: {
-    //<!-- Sets all values that need to be displayed on the pop up interface and queries each SPARQL endpoint -->
+    //Sets all values that need to be displayed on the pop up interface and queries each SPARQL endpoint
     getPopUp(item) {
       this.popUpInfo.wikiLink = item.wikientity.value
       this.popUpInfo.vtLink = item.vturi.value
@@ -159,7 +159,7 @@ export default {
       this.offset = this.offset + 1
       this.getDashItems()
     },
-    // Queries database for previous page of searched items -->
+    // Queries database for previous page of searched items
     backPage() {
       this.isFetched = false
       this.offset = this.offset - 1
@@ -186,7 +186,6 @@ export default {
               }
             }
         );
-        console.log(response.data)
         console.log("Added triple")
         //await this.addProvenance(item)
       } catch (e) {
@@ -231,7 +230,6 @@ export default {
               }
             }
         );
-        console.log(response.data)
         console.log("Added provenance data")
       } catch (e) {
         this.errors.push(e)
@@ -263,7 +261,6 @@ export default {
               }
             }
         );
-        console.log(response.data)
         this.popUpInfo.vtData = response.data
         this.popUpInfo.isVtDataFetched = true;
       } catch (e) {
@@ -271,7 +268,7 @@ export default {
       }
     },
     async getApprovedData(item) {
-      // <!-- API call gets approved triples from the Personal Namespace -->
+      // API call gets approved triples from the Personal Namespace
       try {
         const response = await axios.post(
             'http://localhost:80/blazegraph/namespace/PersonalGraph/sparql/',
@@ -296,7 +293,6 @@ export default {
             }
         );
         console.log("Approved Data")
-        console.log(response.data)
         this.popUpInfo.ApprovedData = response.data
         this.popUpInfo.isApprovedDataFetched = true;
       } catch (e) {
@@ -304,8 +300,8 @@ export default {
       }
     },
     async getWikiData(item) {
-      // <!-- API call gets triples from WikiData's SPARQL Endpoint -->
-      // <!-- Limited to only a set amount of predicates -->
+      // API call gets triples from WikiData's SPARQL Endpoint
+      // Limited to only a set amount of predicates
       try {
         const response = await axios.post(
             'https://query.wikidata.org/sparql',
@@ -348,7 +344,6 @@ export default {
               }
             }
         );
-        console.log(response.data)
         this.popUpInfo.wikiData = response.data
         this.popUpInfo.isWikiDataFetched = true;
       } catch (e) {
@@ -400,7 +395,6 @@ export default {
             }
         );
         this.posts = response.data
-        console.log(this.posts)
         this.isFetched = true
         this.isInitialised = true
       } catch (e) {
@@ -432,7 +426,6 @@ export default {
             }
         );
         this.searchTerms = response.data
-        console.log(this.searchTerms)
       } catch (e) {
         this.errors.push(e)
       }

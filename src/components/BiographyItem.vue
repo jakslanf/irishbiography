@@ -1,5 +1,6 @@
 <template>
   <div>
+    <!-- Just displays the name and photo that expands when hovered over -->
     <img :src=displayphoto width="200" height="200">
     <div>{{ fullName.replace(/[{()}]/g, '') }}</div>
   </div>
