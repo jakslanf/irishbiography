@@ -197,34 +197,33 @@ export default {
     {
       // API call that inserts provenance related triples into the personal namespace
       try {
-        // var uniqueID = new Date().valueOf();
+        var uniqueID = new Date().valueOf();
+        var timestamp = new Date().toISOString();
         const response = await axios.post(
             'http://localhost:80/blazegraph/namespace/PersonalGraph/sparql/',
             new URLSearchParams({
-              'update': "INSERT DATA\n" +
-                  "{\n" +
-                  "prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .\n" +
-                  "prefix foaf: <http://xmlns.com/foaf/0.1/> .\n" +
-                  "prefix prov: <http://www.w3.org/ns/prov#> .\n" +
-                  "prefix :     <http://example.org#> .\n" +
+              'update': "INSERT DATA {\n" +
+                  "  @prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .\n" +
+                  "@prefix foaf: <http://xmlns.com/foaf/0.1/> .\n" +
+                  "@prefix prov: <http://www.w3.org/ns/prov#> .\n" +
+                  "@prefix :     <http://example.org#> .\n" +
                   "\n" +
-                  ":approvalActivity"+ 45 +"\n" +
+                  ":approvalActivity"+ uniqueID +"\n" +
                   "    a prov:Activity;\n" +
-                  "    :mentionsSubject " + this.popUpInfo.vtLink +";\n" +
-                  "    :mentionsObject " + item.value.value +";\n" +
-                  "    :mentionsRelationship '"+ item.prop.value +"';\n" +
+                  "    :mentionsSubject <" + this.popUpInfo.vtLink +">;\n" +
+                  "    :mentionsObject <" + item.value.value +">;\n" +
+                  "    :mentionsRelationship <"+ item.prop.value +">;\n" +
                   "    prov:wasAssociatedWith :historianWilde;\n" +
                   "    prov:wasGeneratedBy :webInterface;\n" +
-                  "    prov:startedAtTime '2011-07-14T01:01:01Z'^^xsd:dateTime;\n" +
-                  "    prov:endedAtTime      '2011-07-14T02:02:02Z'^^xsd:dateTime;\n" +
+                  "    prov:startedAtTime '"+ timestamp +"'^^xsd:dateTime;\n" +
+                  "    prov:endedAtTime      '"+ timestamp +"'^^xsd:dateTime;\n" +
                   ".\n" +
                   "\n" +
                   ":historianWilde\n" +
                   "    a foaf:Person, prov:Agent;\n" +
                   "    foaf:givenName       \"Wilde\";\n" +
                   "    prov:actedOnBehalfOf :trinityCollege;\n" +
-                  ".\n" +
-                  "}"
+                  ". }"
             }),
             {
               headers: {
@@ -233,6 +232,7 @@ export default {
             }
         );
         console.log(response.data)
+        console.log("Added provenance data")
       } catch (e) {
         this.errors.push(e)
       }
