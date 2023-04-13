@@ -1,9 +1,8 @@
 <template>
   <div>
-    <!-- <img :src=posts.results.bindings[2].photos.value width="200" height="200">
-    <pre>{{posts.results.bindings[2].fullnamestring.value}}</pre> -->
     <Transition>
       <div v-if="isFetched">
+        <!-- Search features-->
         <button @click="backPage()">Previous Page</button>
         <button @click="nextPage()">Next Page</button>
         <input v-model="searchString" placeholder="Search Names"/>
@@ -14,12 +13,15 @@
           </option>
         </select>
         <button @click="goSearch()">Search</button>
+        <!-- Pop up containing info that appears when a person is clicked-->
+        <!-- Each template is a separate tab on the pop up. One corresponding with approved facts, virtual treasury facts and wikidata facts-->
         <BiographyPopUp v-if="isPopUp" @close="togglePopUp">
           <template v-slot:header>
             <h1>{{ popUpInfo.name }}</h1>
             <img :src=popUpInfo.imageUrl width="200" height="200" v-if="popUpInfo.imageUrl != ''">
             <h2><a :href="popUpInfo.dibLink">Read Biography on DIB</a></h2>
           </template>
+          <!-- Approved Facts -->
           <template v-slot:approved>
             <div v-if="popUpInfo.isApprovedDataFetched">
               <h2>Approved by historians:</h2>
@@ -30,6 +32,7 @@
               </div>
             </div>
           </template>
+          <!-- WikiData Facts -->
           <template v-slot:wikidata>
             <div v-if="popUpInfo.isWikiDataFetched">
               <h2>According to WikiData <a :href="popUpInfo.wikiLink">(View Here)</a>:</h2>
@@ -41,6 +44,7 @@
               </div>
             </div>
           </template>
+          <!-- VirtualTreasury Facts -->
           <template v-slot:treasury>
             <div v-if="popUpInfo.isVtDataFetched">
               <h2>According to the VirtualTreasury <a :href="popUpInfo.vtLink">(View Here)</a>:</h2>
@@ -54,6 +58,7 @@
           </template>
         </BiographyPopUp>
         <div id="dash">
+          <!-- If search results fail -->
           <div v-if="!posts.results.bindings.length">No Person Found. Try a different search.</div>
           <div id="individual" v-for="item in posts.results.bindings">
             <BiographyItem @click="getPopUp(item)" :full-name="item.fullnamestring.value"
@@ -61,6 +66,9 @@
           </div>
         </div>
       </div>
+      <!-- This code hides the dashboard items until the API retrieves them. -->
+      <!-- If this fails to disappear, this means the API is not reaching Blazegraph -->
+      <!-- Check IP is correct for Blazegraph in the reverse proxy configuration if so -->
       <h1 v-else v-if="!isInitialised">Loading...<br>Contact Finn if stuck at Loading</h1>
     </Transition>
   </div>
@@ -79,23 +87,31 @@ export default {
     let posts = [];
     return {
       BiographyPopUp,
+      <!-- Booleans used to ensure values are not displayed unless fully retrieved -->
       isInitialised: false,
       isPopUp: false,
       isFetched: false,
       isPopUpFetched: false,
+      <!-- Strings used by user for searching -->
       searchString: "",
       searchCategory: "",
+      <!-- What "page" of search results the dashboard is on -->
       offset: 0,
+      <!-- How many items to display on a single page -->
       limit: 12,
       searchTerms: [],
+      <!-- API call results and errors in the two below -->
       posts: [],
       errors: [],
+      <!-- Collection of values related to popups -->
       popUpInfo: {
         name: "Loading...",
         imageUrl: "",
+        <!-- Triples returned by API from each SPARQL endpoint -->
         vtData: [],
         wikiData: [],
         approvedData: [],
+        <!-- Booleans to ensure properly retrieved before displaying -->
         isVtDataFetched: false,
         isWikiDataFetched: false,
         isApprovedDataFetched: false,
@@ -105,6 +121,7 @@ export default {
       }
     }
   }, methods: {
+    <!-- Sets all values that need to be displayed on the pop up interface and queries each SPARQL endpoint -->
     getPopUp(item) {
       this.popUpInfo.wikiLink = item.wikientity.value
       this.popUpInfo.vtLink = item.vturi.value
@@ -126,19 +143,23 @@ export default {
       this.isPopUpFetched = true
       this.togglePopUp()
     },
+    <!-- Toggles Pop Up, used for interface buttons -->
     togglePopUp() {
       this.isPopUp = !this.isPopUp
     },
+    <!-- Queries database for searched items -->
     goSearch() {
       this.offset = 0
       this.isFetched = false
       this.getDashItems()
     },
+    <!-- Queries database for next page of searched items -->
     nextPage() {
       this.isFetched = false
       this.offset = this.offset + 1
       this.getDashItems()
     },
+    <!-- Queries database for previous page of searched items -->
     backPage() {
       this.isFetched = false
       this.offset = this.offset - 1
@@ -147,11 +168,9 @@ export default {
       }
       this.getDashItems()
     },
+    <!-- API call that inserts approved triples into the personal namespace -->
     async approveTriple(item, label)
     {
-      this.popUpInfo.vtLink
-      item.prop.value
-      item.value.value
       try {
         const response = await axios.post(
             'http://localhost:80/blazegraph/namespace/PersonalGraph/sparql/',
@@ -169,10 +188,57 @@ export default {
         );
         console.log(response.data)
         console.log("Added triple")
+        await this.addProvenance(item)
       } catch (e) {
         this.errors.push(e)
       }
     },
+    <!-- API call that inserts provenance related triples into the personal namespace -->
+    async addProvenance(item)
+    {
+      try {
+        var uniqueID = new Date().valueOf();
+        const response = await axios.post(
+            'http://localhost:80/blazegraph/namespace/PersonalGraph/sparql/',
+            new URLSearchParams({
+              'update': "INSERT DATA\n" +
+                  "{\n" +
+                  "@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .\n" +
+                  "@prefix foaf: <http://xmlns.com/foaf/0.1/> .\n" +
+                  "@prefix prov: <http://www.w3.org/ns/prov#> .\n" +
+                  "@prefix :     <http://example.org#> .\n" +
+                  "\n" +
+                  ":approvalActivity"+ uniqueID +"\n" +
+                  "    a prov:Activity;\n" +
+                  "    :mentionsSubject " + this.popUpInfo.vtLink +";\n" +
+                  "    :mentionsObject " + item.value.value +";\n" +
+                  "    :mentionsRelationship \""+ item.prop.value +"\";\n" +
+                  "    prov:wasAssociatedWith :historianWilde;\n" +
+                  "    prov:wasGeneratedBy :webInterface;\n" +
+                  "    prov:startedAtTime \"2011-07-14T01:01:01Z\"^^xsd:dateTime;\n" +
+                  "    prov:endedAtTime      \"2011-07-14T02:02:02Z\"^^xsd:dateTime;\n" +
+                  ".\n" +
+                  "\n" +
+                  ":historianWilde\n" +
+                  "    a foaf:Person, prov:Agent;\n" +
+                  "    foaf:givenName       \"Wilde\";\n" +
+                  "    prov:actedOnBehalfOf :trinityCollege;\n" +
+                  ".\n" +
+                  "}"
+            }),
+            {
+              headers: {
+                'Accept': 'application/json'
+              }
+            }
+        );
+        console.log(response.data)
+        console.log("Added triple")
+      } catch (e) {
+        this.errors.push(e)
+      }
+    },
+    <!-- API call gets virtual treasury data from the Beyond2022 Sample Namespace -->
     async getVtData(item) {
       try {
         const response = await axios.post(
@@ -205,6 +271,7 @@ export default {
         this.errors.push(e)
       }
     },
+    <!-- API call gets approved triples from the Personal Namespace -->
     async getApprovedData(item) {
       try {
         const response = await axios.post(
@@ -237,6 +304,8 @@ export default {
         this.errors.push(e)
       }
     },
+    <!-- API call gets triples from WikiData's SPARQL Endpoint -->
+    <!-- Limited to only a set amount of predicates -->
     async getWikiData(item) {
       try {
         const response = await axios.post(

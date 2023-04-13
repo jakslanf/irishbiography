@@ -1,0 +1,21 @@
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix :     <http://example.org#> .
+
+:approvalActivity
+    a prov:Activity;
+    :mentionsSubject :historicalPerson;
+    :mentionsObject :object;
+    :mentionsRelationship "label";
+    prov:wasAssociatedWith :historianWilde;
+    prov:wasGeneratedBy :webInterface;
+    prov:startedAtTime "2011-07-14T01:01:01Z"^^xsd:dateTime;
+    prov:endedAtTime      "2011-07-14T02:02:02Z"^^xsd:dateTime;
+.
+
+:historianWilde
+    a foaf:Person, prov:Agent;
+    foaf:givenName       "Wilde";
+    prov:actedOnBehalfOf :trinityCollege;
+.

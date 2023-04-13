@@ -5,20 +5,10 @@ import GetPerson from './components/BiographDashboard.vue'
 import axios from 'axios';
 import BiographDashboard from "@/components/BiographDashboard.vue";
 </script>
-
-<!--  import axios from 'axios'; Vue.prototype.$http = axios; -->
 <template>
-  <!-- <header>
-    <img alt="Vue logo" class="logo" src="./assets/logo.svg" width="125" height="125" />
-
-    <div class="wrapper">
-      <HelloWorld msg="You did it! Bazinga" />
-    </div>
-  </header> -->
-
   <main>
-    <!-- <TheWelcome /> -->
     <h1>Dashboard</h1>
+    <!-- BibliographyDashboard contains the main code-->
     <BiographDashboard />
   </main>
 </template>
