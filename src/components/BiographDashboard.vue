@@ -239,12 +239,8 @@ export default {
         const response = await axios.post(
             'http://localhost:80/blazegraph/namespace/BeyondSample/sparql/',
             new URLSearchParams({
-              'query': '## Querying VT for additional information\n' +
-                  'PREFIX cidoc: <http://erlangen-crm.org/current/>\n' +
-                  'PREFIX b2022: <https://ont.virtualtreasury.ie/ontology#>\n' +
+              'query': 'PREFIX b2022: <https://ont.virtualtreasury.ie/ontology#>\n' +
                   'PREFIX rdfs:  <http://www.w3.org/2000/01/rdf-schema#>\n' +
-                  'PREFIX owl:<http://www.w3.org/2002/07/owl#>\n' +
-                  'PREFIX wdt: <http://www.wikidata.org/prop/direct/>\n' +
                   '\n' +
                   'SELECT *\n' +
                   'WHERE{\n' +
@@ -407,7 +403,6 @@ export default {
                   'PREFIX b2022: <https://ont.virtualtreasury.ie/ontology#>\n' +
                   'PREFIX rdfs:  <http://www.w3.org/2000/01/rdf-schema#>\n' +
                   'PREFIX owl:<http://www.w3.org/2002/07/owl#>\n' +
-                  'PREFIX wdt: <http://www.wikidata.org/prop/direct/>\n' +
                   '\n' +
                   'SELECT DISTINCT ?area_of_interest_uri (SAMPLE(?area_of_interest_string) AS ?interest_name)\n' +
                   'WHERE{\n' +
