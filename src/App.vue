@@ -1,7 +1,4 @@
 <script setup>
-import HelloWorld from './components/HelloWorld.vue'
-import TheWelcome from './components/TheWelcome.vue'
-import GetPerson from './components/BiographDashboard.vue'
 import axios from 'axios';
 import BiographDashboard from "@/components/BiographDashboard.vue";
 </script>
